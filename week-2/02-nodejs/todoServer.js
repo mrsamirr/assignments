@@ -41,9 +41,84 @@
  */
   const express = require('express');
   const bodyParser = require('body-parser');
+const fs = require('fs');
   
   const app = express();
   
   app.use(bodyParser.json());
   
   module.exports = app;
+ 
+  let todoItems = [];
+
+  function findIndex(arr, id){
+    for(let i=0;i<arr.length;i++){
+      if(arr[i].id === id) return i;
+    }
+    return -1;
+  }
+
+  app.get('/todos',(req,res) =>{
+    //  Returns a list of all todo items.
+      // fs.readFile("todo.json","utf8", function(err, data){
+      //   if(err) throw err;
+      //   res.json(JSON.parse(data));
+      // });
+
+      res.json({todoItems});
+  });
+
+  app.get('/todos:id',(req,res) =>{
+    // Returns a specific todo item identified by its ID.
+    const todoId = todoItems.find(t=>t.id == parseInt(req.params.id));
+    if(!todoId){
+      res.json({
+        "message": "No Id found"
+      });
+    } else{
+      res.json({
+        "message": todoId
+      });
+    }
+  });
+     
+  app.post('/todos',(req,res) => {
+    // Creates a new todo item
+     const newTodo = {
+      id: req.body.id,
+      title: req.body.title,
+      description: req.body.description
+     }
+     todoItems.push(newTodo);
+     res.json({
+      "message" : "Task Added"
+     });
+  });
+  
+  app.put('/todos/:id',(req,res) => {
+    // Updates an existing todo item identified by its ID.
+    const todoIndex = findIndex(todoItems, parseInt(req.params.id));
+    if (todoIndex === -1) {
+      res.status(404).send();
+    } else {
+      const updatedTodo = {
+        id: todoItems[todoIndex].id,
+        title: req.body.title,
+        description: req.body.description
+      };
+      todoItems[todoIndex] = updatedTodo;
+      req.json(updatedTodo);
+    }
+  });
+
+  app.delete('/todos:id', (req,res) => {
+    // Description: Deletes a todo item identified by its ID.
+    const todoId = todoItems.findIndex(t=>t.id == parseInt(req.params.id)); 
+    if (todoId == -1) {
+      res.status(404).send();
+    } else {
+      todoItems.splice(todoIndex, 1); // removes element from array
+      res.status(200).send();
+    }    
+  })
+  app.listen(3000);

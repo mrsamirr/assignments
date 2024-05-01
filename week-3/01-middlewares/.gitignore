@@ -1,1 +1,5 @@
 node_modules
+lcov-report
+clover.xml
+coverage-final.json
+lcov.info
